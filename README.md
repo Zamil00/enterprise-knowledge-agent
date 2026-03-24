@@ -31,10 +31,10 @@ This project was built as a credible portfolio asset for a GenAI Solutions Engin
 ## Demo Preview
 
 ### Overview
-![Enterprise Knowledge Agent Overview](docs/images/eka-overview.png)
+![Enterprise Knowledge Agent Overview](docs/images/eka_overview.png)
 
 ### Analysis and Evidence View
-![Enterprise Knowledge Agent Analysis and Evidence](docs/images/eka-analysis-evidence.png)
+![Enterprise Knowledge Agent Analysis and Evidence](docs/images/eka_analysis_evidence.png)
 
 ## Project structure
 ```text
