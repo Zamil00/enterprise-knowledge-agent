@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Enterprise Knowledge Agent</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <main class="container">
+    <section class="hero">
+      <p class="eyebrow">Multi-Agent RAG Demo</p>
+      <h1>Enterprise Knowledge Agent</h1>
+      <p class="sub">Upload a document, ask a grounded question, and inspect the evidence used to answer.</p>
+    </section>
+
+    <section class="card">
+      <h2>1. Upload document</h2>
+      <form id="upload-form">
+        <input type="file" id="file-input" accept=".pdf,.docx,.txt" required />
+        <button type="submit">Upload and index</button>
+      </form>
+      <p id="upload-status" class="status"></p>
+    </section>
+
+    <section class="card">
+      <h2>2. Ask a question</h2>
+      <form id="query-form">
+        <textarea id="question" rows="4" placeholder="What does the remote work policy say about equipment reimbursement?" required></textarea>
+        <button type="submit">Run query</button>
+      </form>
+      <p id="query-status" class="status"></p>
+    </section>
+
+    <section class="card results">
+      <h2>Answer</h2>
+      <p><strong>Evidence quality:</strong> <span id="evidence-quality">—</span></p>
+      <div id="answer" class="panel">No answer yet.</div>
+      <h3>Analysis summary</h3>
+      <div id="analysis" class="panel">No analysis yet.</div>
+      <h3>Retrieved evidence</h3>
+      <div id="chunks"></div>
+    </section>
+  </main>
+  <script src="app.js"></script>
+</body>
+</html>
