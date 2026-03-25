@@ -94,6 +94,94 @@ A major weakness of many GenAI demos is that they produce confident-looking answ
 This project introduces a visible `evidence_quality` signal to make uncertainty explicit and reduce blind trust in the final answer.
 
 ---
+## Component flow
+
+```mermaid
+flowchart LR
+    A[User uploads document] --> B[FastAPI Upload Endpoint]
+    B --> C[Document extraction]
+    C --> D[Chunking]
+    D --> E[Embedding generation]
+    E --> F[ChromaDB vector store]
+
+    G[User asks question] --> H[FastAPI Query Endpoint]
+    H --> I[Scoped retrieval by document_id]
+    I --> F
+    F --> J[Retrieved chunks]
+
+    J --> K[Analysis Agent]
+    K --> L[Evidence quality assessment]
+    K --> M[Analysis summary]
+
+    J --> N[Report Agent]
+    M --> N
+    L --> N
+    N --> O[Grounded final answer]
+
+    O --> P[React UI]
+    M --> P
+    J --> P
+    L --> P
+```
+
+## Component responsibilities
+
+### Upload path
+The upload path is responsible for turning raw user documents into retrievable indexed content.
+
+It includes:
+- document extraction
+- chunk creation
+- embedding generation
+- vector storage in ChromaDB
+
+### Retrieval path
+The retrieval path takes the user question, embeds it, and searches only within the selected uploaded document using `document_id` scoping.
+
+This is important because it prevents cross-document contamination and keeps answers grounded in the intended source.
+
+### Analysis path
+The Analysis Agent evaluates:
+- what is directly supported
+- what is ambiguous or missing
+- how strong the evidence appears to be
+
+This layer exists to reduce blind confidence and make the system more explainable.
+
+### Reporting path
+The Report Agent uses:
+- the user question
+- the analysis summary
+- the retrieved evidence
+
+to produce a final grounded response.
+
+If evidence is insufficient, the workflow is designed to answer conservatively rather than hallucinate.
+
+### UI layer
+The React frontend exposes:
+- upload and indexing flow
+- measured timing
+- final answer
+- analysis summary
+- evidence quality
+- retrieved evidence chunks
+
+This makes the system behavior visible to the user instead of hiding all reasoning behind a single answer box.
+
+## Why this phase matters
+
+This architecture view makes the project stronger for an architect-track portfolio because it shows:
+
+- system boundaries
+- component responsibilities
+- retrieval scoping logic
+- reasoning-layer separation
+- how the UI reflects backend workflow decisions
+
+In other words, the project is presented not only as a working demo, but as a designed system.
+
+---
 
 ## Trade-offs
 
