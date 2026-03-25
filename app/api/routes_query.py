@@ -19,6 +19,7 @@ def query_documents(payload: QueryRequest) -> QueryResponse:
 
     initial_state = {
         "question": payload.question,
+        "document_id": payload.document_id,
         "top_k": payload.top_k or settings.top_k_results,
     }
 
@@ -30,7 +31,8 @@ def query_documents(payload: QueryRequest) -> QueryResponse:
 
     processing_time_seconds = round(time.perf_counter() - start_time, 3)
     logger.info(
-        "Query completed | question=%s | evidence_quality=%s | chunks=%s | time=%.3fs",
+        "Query completed | document_id=%s | question=%s | evidence_quality=%s | chunks=%s | time=%.3fs",
+        payload.document_id,
         payload.question,
         result.get("evidence_quality", "unknown"),
         len(result.get("retrieved_chunks", [])),

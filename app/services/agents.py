@@ -28,7 +28,8 @@ def _client() -> OpenAI:
 
 def retrieval_agent(state: AgentState) -> AgentState:
     top_k = state.get("top_k") or get_settings().top_k_results
-    chunks = retrieve(state["question"], top_k=top_k)
+    document_id = state["document_id"]
+    chunks = retrieve(state["question"], top_k=top_k, document_id=document_id)
     return {**state, "retrieved_chunks": chunks}
 
 

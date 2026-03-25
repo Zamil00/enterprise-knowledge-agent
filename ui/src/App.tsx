@@ -120,7 +120,7 @@ export default function App() {
   }
 
   async function handleQuery() {
-    if (!canAsk) return;
+    if (!canAsk || !uploadResult?.document_id) return;
 
     setError("");
     setQueryResult(null);
@@ -140,7 +140,10 @@ export default function App() {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ question }),
+        body: JSON.stringify({
+          question,
+          document_id: uploadResult.document_id,
+        }),
       });
 
       if (!response.ok) {

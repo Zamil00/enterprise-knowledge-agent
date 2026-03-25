@@ -260,71 +260,105 @@ http://127.0.0.1:5173
    - retrieved source chunks
 
 ---
+## Evidence behavior and evaluation logic
 
-## Weak-evidence behavior
+One of the main goals of this project is not only to answer questions, but to do so in a way that is transparent about evidence strength.
 
-One of the key goals of this project is not just answering questions, but doing so responsibly.
+The system is intentionally designed to behave differently depending on how strongly the uploaded document supports the query.
 
-The system is designed to behave differently depending on evidence strength.
+### 1. Directly supported questions
 
-### Directly supported question
-If the document clearly supports the answer, the system should return:
-- a grounded answer
-- a useful analysis summary
-- retrieved chunks with supporting evidence
-- a reasonable evidence quality signal
+If the uploaded document clearly supports the answer, the system should:
 
-### Partially supported question
-If the document only partially supports the answer, the system should:
-- answer conservatively
-- highlight ambiguity
-- avoid inventing missing details
-- reflect this in the analysis summary
+- return a grounded answer
+- surface relevant retrieved chunks
+- produce an analysis summary that reflects direct support
+- assign a stronger evidence-quality signal when appropriate
 
-### Unsupported question
-If the question is not supported by the uploaded document, the system should:
-- avoid confident hallucination
-- signal weak evidence
-- make the lack of support visible through the analysis layer
+This is the expected behavior for straightforward document understanding tasks where the answer is explicitly available in the indexed content.
 
-This behavior is one of the most important differentiators of the project.
+### 2. Partially supported questions
+
+If the document only partially supports the answer, the system should behave conservatively.
+
+In these cases, the workflow should:
+
+- acknowledge what is supported
+- identify ambiguity or missing detail
+- avoid overcommitting beyond the retrieved evidence
+- reflect uncertainty in the analysis layer
+
+This behavior is important because enterprise-facing systems should not treat partial evidence as full certainty.
+
+### 3. Unsupported questions
+
+If the document does not support the question, the system should avoid confident hallucination.
+
+Instead, it should:
+
+- avoid fabricating missing information
+- state that evidence is insufficient
+- return a weaker evidence-quality signal
+- make the lack of support visible through the analysis summary
+
+This is one of the most important design goals of the project: the system should fail transparently rather than fail confidently.
 
 ---
 
 ## Example evaluation scenarios
 
-### Scenario 1 — Directly supported
-**Question:**  
+### Scenario A — Directly supported
+
+**Document type:** PDF / DOCX / TXT  
+**Example question:**  
 `What is the main purpose of this document?`
 
 **Expected behavior:**  
-A grounded summary based on retrieved chunks, with evidence quality reflecting the available support.
+The system should produce a grounded summary based on retrieved chunks and return an evidence-quality signal that matches the available support.
 
-### Scenario 2 — Partially supported
-**Question:**  
-`What long-term projects does the applicant want to lead?`
+### Scenario B — Partially supported
+
+**Example question:**  
+`What long-term initiatives does the author want to lead in the future?`
 
 **Expected behavior:**  
-The system should acknowledge that motivation may be present, but that explicit future project ownership may not be clearly stated.
+If motivation or direction is implied but not explicitly stated, the answer should remain cautious and highlight ambiguity rather than infer unsupported specifics.
 
-### Scenario 3 — Unsupported
-**Question:**  
+### Scenario C — Unsupported
+
+**Example question:**  
 `What is the company revenue forecast for 2027?`
 
 **Expected behavior:**  
-The system should show weak evidence and avoid generating a fabricated answer.
+If the uploaded document contains no such information, the system should avoid inventing an answer and explicitly communicate insufficient evidence.
 
 ---
 
-## Benchmark snapshot
+## Why this matters
 
-> Replace the example values below with your own measured values if they change after additional testing.
+This evidence-aware behavior is a key differentiator of the project.
+
+Instead of treating document Q&A as a simple retrieval-plus-generation task, the system introduces an intermediate reasoning layer that evaluates support strength before producing the final answer.
+
+That makes the workflow more aligned with enterprise expectations around:
+
+- explainability
+- trustworthiness
+- conservative answer behavior
+- reviewability of generated outputs
+
+In other words, the system is not only optimized to answer — it is also designed to signal when it should *not* answer with confidence.
+
+---
+
+
+## Benchmark snapshot
 
 | Test Case | Document Type | Chunks Created | Index Time | Query Time | Evidence Quality | Result |
 |---|---:|---:|---:|---:|---|---|
-| Motivation Letter | PDF | 2 | 2.8s | 3.1s | Medium | Correct |
-| Policy Note | TXT | 1 | 0.8s | 2.0s | High | Correct |
-| Resume / Profile | DOCX | 1 | 1.7s | 4.2s | Weak | Partially correct |
+| Company Policy | TXT | 2 | 3.747s | 19.875s | Strong | Correct |
+| History of Economics | DOCX | 3 | 0.864s | 17.908s | Strong | Correct |
+| Ghibli Style Video Prompts | PDF | 12 | 0.908s | 7.908s | Strong | Correct |
 
 ---
 

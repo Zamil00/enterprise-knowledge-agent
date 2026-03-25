@@ -7,7 +7,6 @@ class HealthResponse(BaseModel):
     service: str = "enterprise-knowledge-agent"
 
 
-
 class UploadResponse(BaseModel):
     document_id: str
     filename: str
@@ -15,8 +14,10 @@ class UploadResponse(BaseModel):
     message: str
     processing_time_seconds: float | None = None
 
+
 class QueryRequest(BaseModel):
-    question: str = Field(..., min_length=3, description="Question grounded in uploaded documents")
+    question: str = Field(..., min_length=3, description="Question grounded in the selected uploaded document")
+    document_id: str = Field(..., min_length=1, description="ID of the uploaded document to scope retrieval")
     top_k: Optional[int] = Field(default=None, ge=1, le=15)
 
 

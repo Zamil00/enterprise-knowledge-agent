@@ -1,4 +1,4 @@
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 import chromadb
 from app.config import get_settings
 
@@ -6,7 +6,10 @@ from app.config import get_settings
 def get_collection():
     settings = get_settings()
     client = chromadb.PersistentClient(path=settings.chroma_persist_dir)
-    return client.get_or_create_collection(name=settings.collection_name, metadata={"hnsw:space": "cosine"})
+    return client.get_or_create_collection(
+        name=settings.collection_name,
+        metadata={"hnsw:space": "cosine"},
+    )
 
 
 def add_chunks(document_id: str, filename: str, chunks: List[str], embeddings: List[List[float]]) -> int:
@@ -20,13 +23,28 @@ def add_chunks(document_id: str, filename: str, chunks: List[str], embeddings: L
     return len(ids)
 
 
-def search_chunks(query_embedding: List[float], top_k: int = 5) -> List[Dict[str, Any]]:
+def search_chunks(
+    query_embedding: List[float],
+    top_k: int = 5,
+    document_id: Optional[str] = None,
+) -> List[Dict[str, Any]]:
     collection = get_collection()
-    results = collection.query(query_embeddings=[query_embedding], n_results=top_k)
+
+    query_kwargs: Dict[str, Any] = {
+        "query_embeddings": [query_embedding],
+        "n_results": top_k,
+    }
+
+    if document_id:
+        query_kwargs["where"] = {"document_id": document_id}
+
+    results = collection.query(**query_kwargs)
+
     chunks: List[Dict[str, Any]] = []
     docs = results.get("documents", [[]])[0]
     metas = results.get("metadatas", [[]])[0]
     dists = results.get("distances", [[]])[0]
+
     for doc, meta, dist in zip(docs, metas, dists):
         chunks.append(
             {
@@ -37,4 +55,5 @@ def search_chunks(query_embedding: List[float], top_k: int = 5) -> List[Dict[str
                 "score": round(1 - float(dist), 4) if dist is not None else None,
             }
         )
+
     return chunks
